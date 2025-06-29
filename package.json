@@ -21,7 +21,14 @@
     "fix-mismatches": "npx syncpack fix-mismatches && pnpm install",
     "changelog": "git fetch --all && gitmoji-changelog",
     "commit": "git-cz",
-    "release": "release-it"
+    "release": "release-it",
+    "user:create-premium": "cd apps/dashboard && npm run user:create-premium",
+    "user:modify": "cd apps/dashboard && npm run user:modify",
+    "user:view": "cd apps/dashboard && npm run user:view",
+    "user:reset-usage": "cd apps/dashboard && npm run user:reset-usage",
+    "user:cleanup": "cd apps/dashboard && npm run user:cleanup",
+    "user:demo": "cd apps/dashboard && npm run user:demo",
+    "user:create-test-prices": "cd apps/dashboard && npm run user:create-test-prices"
   },
   "config": {
     "commitizen": {
