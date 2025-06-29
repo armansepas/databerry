@@ -1007,6 +1007,8 @@ enum AgentModelName {
   gpt_4_32k
   gpt_4_turbo
   gpt_4_turbo_vision
+  gpt_4o_mini
+  gpt_4_1_mini
   claude_3_haiku
   claude_3_sonnet
   claude_3_opus

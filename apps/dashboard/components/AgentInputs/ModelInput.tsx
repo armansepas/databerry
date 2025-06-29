@@ -210,6 +210,20 @@ export default function ModelInput({}: Props) {
             credits/query (premium)
           </Option>
 
+          <Option value={AgentModelName.gpt_4o_mini}>
+            <ProviderLogo src={ModelConfig[AgentModelName.gpt_4o_mini].icon} />
+            GPT-4o Mini - 128k - {
+              ModelConfig[AgentModelName.gpt_4o_mini].cost
+            }{' '}
+            credit/query
+          </Option>
+
+          <Option value={AgentModelName.gpt_4_1_mini}>
+            <ProviderLogo src={ModelConfig[AgentModelName.gpt_4_1_mini].icon} />
+            GPT-4.1 Mini - 128k -{' '}
+            {ModelConfig[AgentModelName.gpt_4_1_mini].cost} credit/query
+          </Option>
+
           <Option
             value={AgentModelName.claude_3_haiku}
             disabled={!session?.data?.organization?.isPremium}
