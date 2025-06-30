@@ -1,0 +1,636 @@
+# Chaindesk Chatbox Deployment Guide
+
+## Overview
+
+This guide explains how the Chaindesk chatbox/bubble widget works, how to serve it locally, and how to deploy it to a CDN for production use. The chatbox system is built with modern web technologies and can be embedded as either a bubble widget or an iframe.
+
+## What We Did - The Complete Process
+
+### 1. Understanding the Architecture
+
+The Chaindesk chatbox system consists of several key components:
+
+- **Embeds Package** (`packages/embeds/`) - The core widget JavaScript bundle
+- **UI Components** (`packages/ui/`) - React components for the chatbox interface
+- **Build System** - ESBuild configuration for bundling and serving
+- **Test Environment** - Local development and testing setup
+
+### 2. Tech Stack Breakdown
+
+#### Core Technologies
+- **ESBuild** - Ultra-fast JavaScript bundler and dev server
+- **React** - UI framework for the chatbox components
+- **TypeScript** - Type-safe development
+- **TailwindCSS** - Utility-first CSS framework
+- **Web Components** - Custom HTML elements for embedding
+
+#### Key Packages
+- `@chaindesk/embeds` - Main package containing the widget code
+- `@chaindesk/ui` - Shared UI components and chatbox logic
+- `@chaindesk/lib` - Shared utilities and types
+
+### 3. How the Build System Works
+
+The build process is handled by ESBuild configuration in `packages/embeds/esbuild.config.mjs`:
+
+```javascript
+const isProd = process.env.NODE_ENV === 'production';
+const outDir = isProd ? './dist' : './tests/dist';
+
+let ctx = await esbuild.context({
+  entryPoints: [
+    'js/chatbox/index.ts',
+    'js/chatbox/legacy.js', 
+    'js/form/index.ts',
+  ],
+  bundle: true,
+  outdir: outDir,
+  format: 'esm',
+  // ... other configuration
+});
+```
+
+#### Development vs Production Configuration
+
+**Development Mode:**
+- Output: `./tests/dist/`
+- Serves from: `http://localhost:8000`
+- Source maps: Enabled
+- Minification: Disabled
+
+**Production Mode:**
+- Output: `./dist/`
+- Serves from: `https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest`
+- Source maps: Disabled
+- Minification: Enabled
+
+### 4. What We Accomplished
+
+#### Step 1: Started the Development Server
+```bash
+cd packages/embeds
+pnpm dev
+```
+This command:
+- Builds the chatbox JavaScript bundles
+- Starts ESBuild in watch mode
+- Serves files from `http://localhost:8000`
+- Enables hot reloading for development
+
+#### Step 2: Created Test HTML File
+We created `test-chatbox.html` with this structure:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaindesk Chatbox Test</title>
+</head>
+<body>
+    <!-- Test buttons for widget control -->
+    <div style="padding: 20px;">
+        <h1>Chaindesk Chatbox Test</h1>
+        <button onclick="openWidget()">Open Chat</button>
+        <button onclick="closeWidget()">Close Chat</button>
+        <button onclick="toggleWidget()">Toggle Chat</button>
+        <button onclick="newConversation()">New Conversation</button>
+    </div>
+
+    <!-- Load the chatbox from local development server -->
+    <script type="module">
+        import Chatbox from 'http://localhost:8000/dist/chatbox/index.js';
+        
+        const widget = await Chatbox.initBubble({
+            agentId: 'cmchosgmh0004mzeuk6xh8far',
+        });
+        
+        // Make widget globally available
+        window.chatWidget = widget;
+        
+        // Control functions
+        window.openWidget = () => widget.open();
+        window.closeWidget = () => widget.close();
+        window.toggleWidget = () => widget.toggle();
+        window.newConversation = () => widget.createNewConversation();
+    </script>
+</body>
+</html>
+```
+
+#### Step 3: Served the HTML File
+You served this HTML file (likely using a simple HTTP server) which allowed the chatbox to load from the local development server.
+
+## How the Widget System Works
+
+### Bubble Widget Architecture
+
+The bubble widget consists of several layers:
+
+1. **Entry Point** (`js/chatbox/index.ts`)
+   - Exports `initBubble` and `initStandard` functions
+   - Handles module loading and initialization
+
+2. **Bubble Component** (`js/chatbox/bubble/bubble.tsx`)
+   - Creates custom web component `chaindesk-chatbox-bubble`
+   - Wraps React components in Web Components API
+
+3. **Initialization Logic** (`js/chatbox/bubble/init.ts`)
+   - Handles widget setup and configuration
+   - Manages DOM insertion and styling
+   - Provides widget control methods (open, close, toggle)
+
+4. **UI Components** (`packages/ui/`)
+   - `ChatBoxLoader` - Main chatbox logic and API integration
+   - `ChatBubble` - Bubble UI component
+   - `ChatboxNavBarLayout` - Standard layout component
+
+### Widget Control Methods
+
+The widget exposes several methods for programmatic control:
+
+```javascript
+const widget = await Chatbox.initBubble({
+  agentId: 'your-agent-id'
+});
+
+// Control methods
+widget.open();              // Show the chatbox
+widget.close();             // Hide the chatbox  
+widget.toggle();            // Toggle visibility
+widget.createNewConversation(); // Start new conversation
+```
+
+## Local Development Setup
+
+### Prerequisites
+- Node.js 18+ 
+- pnpm package manager
+- The Chaindesk monorepo
+
+### Development Workflow
+
+1. **Start the Embeds Dev Server**
+   ```bash
+   cd packages/embeds
+   pnpm dev
+   ```
+   This serves the widget at `http://localhost:8000/dist/chatbox/index.js`
+
+2. **Create Test HTML File**
+   Create an HTML file that imports the widget from the local server
+
+3. **Serve the HTML File**
+   Use any HTTP server to serve your HTML file:
+   ```bash
+   # Python
+   python -m http.server 8080
+   
+   # Node.js (with http-server)
+   npx http-server -p 8080
+   
+   # Live Server (VS Code extension)
+   # Right-click → "Open with Live Server"
+   ```
+
+4. **Test the Widget**
+   Open your served HTML file and test the chatbox functionality
+
+## CDN Deployment Process
+
+### Understanding the Production Pipeline
+
+The production version follows this flow:
+
+1. **Build Process**
+   ```bash
+   cd packages/embeds
+   NODE_ENV=production pnpm build
+   ```
+
+2. **Package Publishing**
+   ```bash
+   pnpm embeds:publish
+   ```
+   This command:
+   - Builds production bundles
+   - Increments package version
+   - Publishes to npm registry
+
+3. **CDN Distribution**
+   - npm package is automatically available on jsdelivr CDN
+   - URL: `https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js`
+
+### Production Usage
+
+Once published, users can embed the widget like this:
+
+```html
+<script type="module">
+  import Chatbox from 'https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js';
+
+  const widget = await Chatbox.initBubble({
+    agentId: 'cmchosgmh0004mzeuk6xh8far',
+  });
+
+  widget.open();
+</script>
+```
+
+## Setting Up Your Own CDN
+
+### Option 1: Using jsdelivr (Recommended)
+
+This is what Chaindesk currently uses:
+
+1. **Publish to npm**
+   ```bash
+   # In packages/embeds
+   pnpm build
+   npm version patch
+   npm publish
+   ```
+
+2. **Use jsdelivr CDN**
+   ```html
+   <script type="module">
+     import Chatbox from 'https://cdn.jsdelivr.net/npm/@your-package/embeds@latest/dist/chatbox/index.js';
+   </script>
+   ```
+
+### Option 2: Custom CDN Setup
+
+1. **Build Production Assets**
+   ```bash
+   cd packages/embeds
+   NODE_ENV=production pnpm build
+   ```
+
+2. **Upload to Your CDN**
+   Upload the `dist/` folder contents to your CDN provider:
+   - AWS CloudFront + S3
+   - Cloudflare
+   - Azure CDN
+   - Google Cloud CDN
+
+3. **Configure CORS**
+   Ensure your CDN serves files with proper CORS headers:
+   ```
+   Access-Control-Allow-Origin: *
+   Access-Control-Allow-Methods: GET, OPTIONS
+   ```
+
+### Option 3: Self-Hosted Static Server
+
+1. **Build Assets**
+   ```bash
+   NODE_ENV=production pnpm build
+   ```
+
+2. **Serve with Static Server**
+   ```bash
+   # Using nginx
+   server {
+       listen 80;
+       server_name your-cdn-domain.com;
+       root /path/to/embeds/dist;
+       
+       location / {
+           add_header Access-Control-Allow-Origin *;
+           try_files $uri $uri/ =404;
+       }
+   }
+   ```
+
+## VPS Deployment Options
+
+When deploying to a VPS, you have several better alternatives than pointing your CDN directly to localhost:8000:
+
+### Option 1: Production Build + Nginx (Recommended)
+
+This is the most robust approach for production:
+
+1. **Build Production Assets**
+   ```bash
+   cd /path/to/databerry/packages/embeds
+   NODE_ENV=production pnpm build
+   ```
+   This creates optimized, minified files in the `dist/` directory.
+
+2. **Set up Nginx to Serve Static Files**
+   ```nginx
+   # /etc/nginx/sites-available/cdn.exampledomain.com
+   server {
+       listen 80;
+       server_name cdn.exampledomain.com;
+       
+       # Serve the embeds files
+       location /embeds/ {
+           alias /path/to/databerry/packages/embeds/dist/;
+           
+           # CORS headers for cross-origin requests
+           add_header Access-Control-Allow-Origin *;
+           add_header Access-Control-Allow-Methods 'GET, OPTIONS';
+           add_header Access-Control-Allow-Headers 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+           
+           # Cache static assets
+           expires 1y;
+           add_header Cache-Control "public, immutable";
+           
+           # Handle OPTIONS requests for CORS
+           if ($request_method = 'OPTIONS') {
+               return 204;
+           }
+       }
+       
+       # Optional: redirect root to main site
+       location / {
+           return 301 https://yourmainsite.com$request_uri;
+       }
+   }
+   ```
+
+3. **Enable and Restart Nginx**
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/cdn.exampledomain.com /etc/nginx/sites-enabled/
+   sudo nginx -t
+   sudo systemctl restart nginx
+   ```
+
+4. **Update Your HTML to Use the CDN**
+   ```html
+   <script type="module">
+     import Chatbox from 'https://cdn.exampledomain.com/embeds/chatbox/index.js';
+     
+     const widget = await Chatbox.initBubble({
+       agentId: 'cmchosgmh0004mzeuk6xh8far',
+     });
+   </script>
+   ```
+
+### Option 2: Nginx Proxy to Development Server
+
+If you want to keep using the development server (not recommended for production):
+
+```nginx
+# /etc/nginx/sites-available/cdn.exampledomain.com
+server {
+    listen 80;
+    server_name cdn.exampledomain.com;
+    
+    location / {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # CORS headers
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+        
+        # Handle OPTIONS requests
+        if ($request_method = 'OPTIONS') {
+            return 204;
+        }
+    }
+}
+```
+
+### Option 3: Docker + Nginx
+
+For a more containerized approach:
+
+1. **Create a Dockerfile for the embeds service**
+   ```dockerfile
+   # packages/embeds/Dockerfile
+   FROM node:18-alpine AS builder
+   
+   WORKDIR /app
+   COPY package.json pnpm-lock.yaml ./
+   RUN npm install -g pnpm && pnpm install
+   
+   COPY . .
+   RUN NODE_ENV=production pnpm build
+   
+   FROM nginx:alpine
+   COPY --from=builder /app/dist /usr/share/nginx/html
+   
+   # Custom nginx config
+   COPY nginx.conf /etc/nginx/conf.d/default.conf
+   
+   EXPOSE 80
+   ```
+
+2. **Create nginx.conf for the container**
+   ```nginx
+   # packages/embeds/nginx.conf
+   server {
+       listen 80;
+       server_name localhost;
+       
+       location / {
+           root /usr/share/nginx/html;
+           try_files $uri $uri/ =404;
+           
+           # CORS headers
+           add_header Access-Control-Allow-Origin *;
+           add_header Access-Control-Allow-Methods 'GET, OPTIONS';
+           add_header Access-Control-Allow-Headers 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+           
+           # Cache headers
+           expires 1y;
+           add_header Cache-Control "public, immutable";
+           
+           if ($request_method = 'OPTIONS') {
+               return 204;
+           }
+       }
+   }
+   ```
+
+3. **Build and run the container**
+   ```bash
+   cd packages/embeds
+   docker build -t chaindesk-embeds .
+   docker run -d -p 8080:80 --name embeds-cdn chaindesk-embeds
+   ```
+
+4. **Proxy through main Nginx**
+   ```nginx
+   server {
+       listen 80;
+       server_name cdn.exampledomain.com;
+       
+       location / {
+           proxy_pass http://localhost:8080;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+       }
+   }
+   ```
+
+### Option 4: Using the Existing Docker Setup
+
+The project already has Docker configurations. You can extend them:
+
+1. **Add embeds service to docker-compose**
+   ```yaml
+   # docker/docker-compose.embeds.yml
+   version: '3'
+   
+   services:
+     embeds:
+       build:
+         context: ../packages/embeds
+         dockerfile: Dockerfile
+       ports:
+         - "8080:80"
+       restart: unless-stopped
+   ```
+
+2. **Create the embeds Dockerfile**
+   ```dockerfile
+   # packages/embeds/Dockerfile
+   FROM node:18-alpine AS builder
+   
+   WORKDIR /app
+   COPY package.json ./
+   RUN npm install -g pnpm && pnpm install
+   
+   COPY . .
+   RUN NODE_ENV=production pnpm build
+   
+   FROM nginx:alpine
+   COPY --from=builder /app/dist /usr/share/nginx/html
+   COPY nginx.conf /etc/nginx/conf.d/default.conf
+   EXPOSE 80
+   ```
+
+## SSL/HTTPS Setup
+
+For production, you'll want HTTPS:
+
+### Using Certbot (Let's Encrypt)
+
+```bash
+# Install certbot
+sudo apt update
+sudo apt install certbot python3-certbot-nginx
+
+# Get SSL certificate
+sudo certbot --nginx -d cdn.exampledomain.com
+
+# Auto-renewal (optional)
+sudo crontab -e
+# Add: 0 12 * * * /usr/bin/certbot renew --quiet
+```
+
+Your nginx config will be automatically updated to include SSL.
+
+## Deployment Automation
+
+### Option 1: Simple Deploy Script
+
+```bash
+#!/bin/bash
+# deploy-embeds.sh
+
+set -e
+
+echo "🚀 Deploying Chaindesk Embeds..."
+
+# Navigate to embeds directory
+cd /path/to/databerry/packages/embeds
+
+# Pull latest changes
+git pull origin main
+
+# Install dependencies
+pnpm install
+
+# Build production assets
+NODE_ENV=production pnpm build
+
+# Copy to nginx directory (alternative to symlink)
+sudo cp -r dist/* /var/www/cdn.exampledomain.com/
+
+# Restart nginx
+sudo systemctl reload nginx
+
+echo "✅ Deployment complete!"
+```
+
+### Option 2: GitHub Actions
+
+```yaml
+# .github/workflows/deploy-embeds.yml
+name: Deploy Embeds to VPS
+
+on:
+  push:
+    branches: [main]
+    paths: ['packages/embeds/**']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install pnpm
+        run: npm install -g pnpm
+        
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: packages/embeds
+        
+      - name: Build
+        run: NODE_ENV=production pnpm build
+        working-directory: packages/embeds
+        
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "packages/embeds/dist/*"
+          target: "/var/www/cdn.exampledomain.com/"
+          strip_components: 3
+          
+      - name: Restart Nginx
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: sudo systemctl reload nginx
+```
+
+## Why Not Point CDN to localhost:8000?
+
+**Problems with pointing CDN directly to localhost:8000:**
+
+1. **Development Server**: ESBuild's dev server is meant for development, not production
+2. **Performance**: No optimization, minification, or caching
+3. **Reliability**: Dev server can crash or restart
+4. **Security**: Development mode may expose debug information
+5. **CORS Issues**: Dev server may not handle CORS properly
+6. **Resource Usage**: Keeps build process running unnecessarily
+
+**Better Approach:**
+- Build static production assets
+- Serve them with a proper web server (Nginx)
+- Use caching and compression
+- Implement proper CORS headers
+- Set up SSL/HTTPS
+
+This gives you better performance, reliability, and security for your CDN.

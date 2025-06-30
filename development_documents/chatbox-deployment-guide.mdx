@@ -1,0 +1,430 @@
+# Chaindesk Chatbox Deployment Guide
+
+## Overview
+
+This guide explains how the Chaindesk chatbox/bubble widget works, how to serve it locally, and how to deploy it to a CDN for production use. The chatbox system is built with modern web technologies and can be embedded as either a bubble widget or an iframe.
+
+## What We Did - The Complete Process
+
+### 1. Understanding the Architecture
+
+The Chaindesk chatbox system consists of several key components:
+
+- **Embeds Package** (`packages/embeds/`) - The core widget JavaScript bundle
+- **UI Components** (`packages/ui/`) - React components for the chatbox interface
+- **Build System** - ESBuild configuration for bundling and serving
+- **Test Environment** - Local development and testing setup
+
+### 2. Tech Stack Breakdown
+
+#### Core Technologies
+- **ESBuild** - Ultra-fast JavaScript bundler and dev server
+- **React** - UI framework for the chatbox components
+- **TypeScript** - Type-safe development
+- **TailwindCSS** - Utility-first CSS framework
+- **Web Components** - Custom HTML elements for embedding
+
+#### Key Packages
+- `@chaindesk/embeds` - Main package containing the widget code
+- `@chaindesk/ui` - Shared UI components and chatbox logic
+- `@chaindesk/lib` - Shared utilities and types
+
+### 3. How the Build System Works
+
+The build process is handled by ESBuild configuration in `packages/embeds/esbuild.config.mjs`:
+
+```javascript
+const isProd = process.env.NODE_ENV === 'production';
+const outDir = isProd ? './dist' : './tests/dist';
+
+let ctx = await esbuild.context({
+  entryPoints: [
+    'js/chatbox/index.ts',
+    'js/chatbox/legacy.js', 
+    'js/form/index.ts',
+  ],
+  bundle: true,
+  outdir: outDir,
+  format: 'esm',
+  // ... other configuration
+});
+```
+
+#### Development vs Production Configuration
+
+**Development Mode:**
+- Output: `./tests/dist/`
+- Serves from: `http://localhost:8000`
+- Source maps: Enabled
+- Minification: Disabled
+
+**Production Mode:**
+- Output: `./dist/`
+- Serves from: `https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest`
+- Source maps: Disabled
+- Minification: Enabled
+
+### 4. What We Accomplished
+
+#### Step 1: Started the Development Server
+```bash
+cd packages/embeds
+pnpm dev
+```
+This command:
+- Builds the chatbox JavaScript bundles
+- Starts ESBuild in watch mode
+- Serves files from `http://localhost:8000`
+- Enables hot reloading for development
+
+#### Step 2: Created Test HTML File
+We created `test-chatbox.html` with this structure:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaindesk Chatbox Test</title>
+</head>
+<body>
+    <!-- Test buttons for widget control -->
+    <div style="padding: 20px;">
+        <h1>Chaindesk Chatbox Test</h1>
+        <button onclick="openWidget()">Open Chat</button>
+        <button onclick="closeWidget()">Close Chat</button>
+        <button onclick="toggleWidget()">Toggle Chat</button>
+        <button onclick="newConversation()">New Conversation</button>
+    </div>
+
+    <!-- Load the chatbox from local development server -->
+    <script type="module">
+        import Chatbox from 'http://localhost:8000/dist/chatbox/index.js';
+        
+        const widget = await Chatbox.initBubble({
+            agentId: 'cmchosgmh0004mzeuk6xh8far',
+        });
+        
+        // Make widget globally available
+        window.chatWidget = widget;
+        
+        // Control functions
+        window.openWidget = () => widget.open();
+        window.closeWidget = () => widget.close();
+        window.toggleWidget = () => widget.toggle();
+        window.newConversation = () => widget.createNewConversation();
+    </script>
+</body>
+</html>
+```
+
+#### Step 3: Served the HTML File
+You served this HTML file (likely using a simple HTTP server) which allowed the chatbox to load from the local development server.
+
+## How the Widget System Works
+
+### Bubble Widget Architecture
+
+The bubble widget consists of several layers:
+
+1. **Entry Point** (`js/chatbox/index.ts`)
+   - Exports `initBubble` and `initStandard` functions
+   - Handles module loading and initialization
+
+2. **Bubble Component** (`js/chatbox/bubble/bubble.tsx`)
+   - Creates custom web component `chaindesk-chatbox-bubble`
+   - Wraps React components in Web Components API
+
+3. **Initialization Logic** (`js/chatbox/bubble/init.ts`)
+   - Handles widget setup and configuration
+   - Manages DOM insertion and styling
+   - Provides widget control methods (open, close, toggle)
+
+4. **UI Components** (`packages/ui/`)
+   - `ChatBoxLoader` - Main chatbox logic and API integration
+   - `ChatBubble` - Bubble UI component
+   - `ChatboxNavBarLayout` - Standard layout component
+
+### Widget Control Methods
+
+The widget exposes several methods for programmatic control:
+
+```javascript
+const widget = await Chatbox.initBubble({
+  agentId: 'your-agent-id'
+});
+
+// Control methods
+widget.open();              // Show the chatbox
+widget.close();             // Hide the chatbox  
+widget.toggle();            // Toggle visibility
+widget.createNewConversation(); // Start new conversation
+```
+
+## Local Development Setup
+
+### Prerequisites
+- Node.js 18+ 
+- pnpm package manager
+- The Chaindesk monorepo
+
+### Development Workflow
+
+1. **Start the Embeds Dev Server**
+   ```bash
+   cd packages/embeds
+   pnpm dev
+   ```
+   This serves the widget at `http://localhost:8000/dist/chatbox/index.js`
+
+2. **Create Test HTML File**
+   Create an HTML file that imports the widget from the local server
+
+3. **Serve the HTML File**
+   Use any HTTP server to serve your HTML file:
+   ```bash
+   # Python
+   python -m http.server 8080
+   
+   # Node.js (with http-server)
+   npx http-server -p 8080
+   
+   # Live Server (VS Code extension)
+   # Right-click → "Open with Live Server"
+   ```
+
+4. **Test the Widget**
+   Open your served HTML file and test the chatbox functionality
+
+## CDN Deployment Process
+
+### Understanding the Production Pipeline
+
+The production version follows this flow:
+
+1. **Build Process**
+   ```bash
+   cd packages/embeds
+   NODE_ENV=production pnpm build
+   ```
+
+2. **Package Publishing**
+   ```bash
+   pnpm embeds:publish
+   ```
+   This command:
+   - Builds production bundles
+   - Increments package version
+   - Publishes to npm registry
+
+3. **CDN Distribution**
+   - npm package is automatically available on jsdelivr CDN
+   - URL: `https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js`
+
+### Production Usage
+
+Once published, users can embed the widget like this:
+
+```html
+<script type="module">
+  import Chatbox from 'https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js';
+
+  const widget = await Chatbox.initBubble({
+    agentId: 'cmchosgmh0004mzeuk6xh8far',
+  });
+
+  widget.open();
+</script>
+```
+
+## Setting Up Your Own CDN
+
+### Option 1: Using jsdelivr (Recommended)
+
+This is what Chaindesk currently uses:
+
+1. **Publish to npm**
+   ```bash
+   # In packages/embeds
+   pnpm build
+   npm version patch
+   npm publish
+   ```
+
+2. **Use jsdelivr CDN**
+   ```html
+   <script type="module">
+     import Chatbox from 'https://cdn.jsdelivr.net/npm/@your-package/embeds@latest/dist/chatbox/index.js';
+   </script>
+   ```
+
+### Option 2: Custom CDN Setup
+
+1. **Build Production Assets**
+   ```bash
+   cd packages/embeds
+   NODE_ENV=production pnpm build
+   ```
+
+2. **Upload to Your CDN**
+   Upload the `dist/` folder contents to your CDN provider:
+   - AWS CloudFront + S3
+   - Cloudflare
+   - Azure CDN
+   - Google Cloud CDN
+
+3. **Configure CORS**
+   Ensure your CDN serves files with proper CORS headers:
+   ```
+   Access-Control-Allow-Origin: *
+   Access-Control-Allow-Methods: GET, OPTIONS
+   ```
+
+### Option 3: Self-Hosted Static Server
+
+1. **Build Assets**
+   ```bash
+   NODE_ENV=production pnpm build
+   ```
+
+2. **Serve with Static Server**
+   ```bash
+   # Using nginx
+   server {
+       listen 80;
+       server_name your-cdn-domain.com;
+       root /path/to/embeds/dist;
+       
+       location / {
+           add_header Access-Control-Allow-Origin *;
+           try_files $uri $uri/ =404;
+       }
+   }
+   ```
+
+## Configuration Options
+
+### Basic Configuration
+
+```javascript
+const widget = await Chatbox.initBubble({
+  agentId: 'your-agent-id',                    // Required
+  
+  // Optional contact information
+  contact: {
+    firstName: 'John',
+    lastName: 'Doe', 
+    email: 'customer@email.com',
+    phoneNumber: '+33612345644',
+    userId: '42424242',
+  },
+  
+  // Optional initial messages
+  initialMessages: [
+    'Hello! How can I help you today?',
+    'What questions do you have?',
+  ],
+  
+  // Optional additional context
+  context: "The user is a premium customer.",
+});
+```
+
+### Advanced Configuration
+
+```javascript
+const widget = await Chatbox.initBubble({
+  agentId: 'your-agent-id',
+  
+  // Interface customization
+  interface: {
+    iconUrl: 'https://your-domain.com/icon.png',
+    theme: 'light', // or 'dark'
+    primaryColor: '#007bff',
+    displayName: 'Support Assistant',
+  },
+  
+  // Positioning (for bubble)
+  position: 'right', // or 'left'
+  
+  // Custom styling
+  styles: {
+    button: {
+      backgroundColor: '#007bff',
+      color: 'white',
+    }
+  }
+});
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **CORS Errors**
+   - Ensure your CDN serves files with proper CORS headers
+   - For local development, serve HTML files via HTTP server, not file://
+
+2. **Module Loading Issues**
+   - Verify the script tag uses `type="module"`
+   - Check that the import URL is accessible
+   - Ensure modern browser support (ES modules)
+
+3. **Widget Not Appearing**
+   - Check browser console for JavaScript errors
+   - Verify agent ID is correct and public
+   - Ensure proper async/await usage
+
+4. **Styling Issues**
+   - Check for CSS conflicts with parent page
+   - Verify Tailwind CSS is properly bundled
+   - Test in different browsers
+
+### Debug Mode
+
+Enable debug logging:
+
+```javascript
+// Add to your HTML before loading the widget
+window.CHAINDESK_DEBUG = true;
+
+const widget = await Chatbox.initBubble({
+  agentId: 'your-agent-id',
+  debug: true,
+});
+```
+
+## File Structure Reference
+
+```
+packages/embeds/
+├── js/
+│   ├── chatbox/
+│   │   ├── index.ts          # Main entry point
+│   │   ├── bubble/
+│   │   │   ├── init.ts       # Bubble initialization
+│   │   │   └── bubble.tsx    # Bubble component
+│   │   └── standard/
+│   │       ├── init.ts       # Standard widget init
+│   │       └── standard.tsx  # Standard component
+│   └── form/
+├── tests/
+│   ├── index.html           # Test file
+│   └── dist/               # Development build output
+├── dist/                   # Production build output
+├── esbuild.config.mjs     # Build configuration
+└── package.json
+```
+
+## Next Steps
+
+1. **Test Locally**: Use the development server to test changes
+2. **Customize Styling**: Modify the UI components and rebuild
+3. **Deploy to CDN**: Follow the CDN deployment process for production use
+4. **Monitor Usage**: Set up analytics and error tracking
+5. **Iterate**: Gather user feedback and improve the widget
+
+## Conclusion
+
+The Chaindesk chatbox system is a sophisticated, modular widget that can be easily embedded into any website. The development setup allows for rapid iteration, while the production CDN deployment ensures global availability and performance. By understanding this architecture, you can customize, extend, and deploy the chatbox to meet your specific needs.

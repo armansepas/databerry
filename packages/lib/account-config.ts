@@ -46,7 +46,7 @@ const config: {
     limits: {
       maxAgents: 1,
       maxAgentsQueries: 100,
-      maxDatastores: 1,
+      maxDatastores: 3, // Increased from 1 to 3
       maxDatasources: 10, // per datastore
       maxFileSize: 1000000, // 1 MB
       maxDataProcessing: 5000000, // 5 MB

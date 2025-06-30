@@ -24,6 +24,13 @@
     "aiNewsLoad": "npm run dotenv -- tsx cron/ai-news-load.ts",
     "sendAccountCleaningWarning": "npm run dotenv -- tsx cron/account-cleaning-warning.tsx",
     "syncDatasources": "npm run dotenv -- tsx cron/sync-datasources.tsx",
+    "user:create-premium": "npm run dotenv -- tsx scripts/user-plan-manage/setup-premium-test-user.ts",
+    "user:modify": "npm run dotenv -- tsx scripts/user-plan-manage/modify-user-subscription.ts",
+    "user:view": "npm run dotenv -- tsx scripts/user-plan-manage/view-user-details.ts",
+    "user:reset-usage": "npm run dotenv -- tsx scripts/user-plan-manage/reset-user-usage.ts",
+    "user:cleanup": "npm run dotenv -- tsx scripts/user-plan-manage/cleanup-test-user.ts",
+    "user:demo": "npm run dotenv -- tsx scripts/user-plan-manage/demo-user-management.ts",
+    "user:create-test-prices": "npm run dotenv -- tsx scripts/user-plan-manage/create-test-prices.ts",
     "test:emails:trigger:receive": "npm run dotenv -- tsx tests/email-inbox/receive-email.ts"
   },
   "alias": {
