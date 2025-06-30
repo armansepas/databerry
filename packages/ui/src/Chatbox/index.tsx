@@ -583,6 +583,7 @@ function ChatBox({
               sx={{
                 alignItems: 'center', // Center the input area properly
                 width: '100%',
+                gap: '4px',
               }}
             >
               <Textarea
@@ -693,7 +694,7 @@ function ChatBox({
               {/* Send Button - Outside the textarea */}
               {!isLoading && (
                 <IconButton
-                  size="lg"
+                  size="sm"
                   type="submit"
                   disabled={isLoading || !methods.formState.isValid}
                   sx={{
@@ -710,9 +711,12 @@ function ChatBox({
                       color: 'primary',
                     },
                   }}
+                  color="primary"
                   variant="soft"
                 >
-                  <SendRoundedIcon />
+                  <div style={{ transform: 'scaleX(-1)' }}>
+                    <SendRoundedIcon />
+                  </div>
                 </IconButton>
               )}
 
