@@ -577,133 +577,146 @@ function ChatBox({
             )}
 
             {/* ========= input area of the chat bubble =========*/}
-            <Textarea
-              // placeholder="Press Shift + Enter to move to the next line"
-              autoFocus={!!autoFocus}
-              slotProps={{
-                textarea: {
-                  id: 'chatbox-input',
-                  ref: textAreaRef,
-                },
-              }}
-              maxRows={24}
-              minRows={isTextAreaExpanded ? 18 : 1}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  methods.handleSubmit(submit)(e);
-                }
-              }}
-              sx={(t) => ({
-                ...(isTextAreaExpanded
-                  ? {
-                      position: 'absolute',
-                      bottom: 0,
-                      zIndex: 1,
-                    }
-                  : {}),
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: 'center', // Center the input area properly
                 width: '100%',
-                flexDirection: 'row',
-                alignItems: 'center',
-                '.MuiTextarea-endDecorator': {
-                  // marginBlockStart: 'auto',
-                  marginBlock: 0,
-                  marginTop: 'auto',
-                },
-                '.MuiTextarea-startDecorator': {
-                  // marginBlockStart: 'auto',
-                  // marginBlockStart: 0,
-                  // marginTop: 'auto',
-                  // width: '100%',
-                  marginBlockEnd: 0,
-                  marginTop: 'auto',
-                  // margin: 0,
-                },
-              })}
-              variant="soft"
-              size="sm"
-              placeholder="سوالی داری ؟"
-              color="neutral"
-              startDecorator={
-                <Stack
-                  direction={'row'}
-                  justifyContent={'space-between'}
-                  sx={{ width: '100%' }}
-                >
-                  <IconButton
-                    variant="plain"
-                    sx={{ maxHeight: '100%' }}
-                    size="sm"
-                    onClick={() => setIsTextAreaExpended(!isTextAreaExpanded)}
-                  >
-                    {isTextAreaExpanded ? (
-                      <UnfoldLessOutlinedIcon />
-                    ) : (
-                      <UnfoldMoreOutlinedIcon />
-                    )}
-                  </IconButton>
-                </Stack>
-              }
-              // disabled={isLoading} // Disabled otherwise stop button is not clickable
-
-              endDecorator={
-                <Stack
-                  direction={'row'}
-                  justifyContent={'space-between'}
-                  sx={{ width: '100%' }}
-                  spacing={1}
-                >
-                  {draftReplyInput &&
-                    React.cloneElement(draftReplyInput, {
-                      onReply: handleOnDraftReply,
-                      inputRef: textAreaRef,
-                    })}
-
-                  {withFileUpload && (
-                    <FileUploader
-                      accept={
-                        AcceptedMimeTypes
-                        // (isAiEnabled
-                        //   ? AcceptedAIEnabledMimeTypes
-                        //   : AcceptedAIDisabledMimeType) || []
+              }}
+            >
+              <Textarea
+                // placeholder="Press Shift + Enter to move to the next line"
+                autoFocus={!!autoFocus}
+                slotProps={{
+                  textarea: {
+                    id: 'chatbox-input',
+                    ref: textAreaRef,
+                  },
+                }}
+                maxRows={24}
+                minRows={isTextAreaExpanded ? 18 : 1}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    methods.handleSubmit(submit)(e);
+                  }
+                }}
+                sx={(t) => ({
+                  ...(isTextAreaExpanded
+                    ? {
+                        position: 'absolute',
+                        bottom: 0,
+                        zIndex: 1,
                       }
-                      changeCallback={(f) => setFiles(f)}
-                    />
-                  )}
-
-                  <Stack direction="row" sx={{ ml: 'auto' }}>
-                    {!isLoading && (
-                      <IconButton
-                        size="sm"
-                        type="submit"
-                        disabled={isLoading || !methods.formState.isValid}
-                        sx={{ maxHeight: '100%' }}
-                        color="primary"
-                        variant="soft"
-                      >
-                        <SendRoundedIcon />
-                      </IconButton>
-                    )}
-
-                    {isLoading && handleAbort && (
-                      <IconButton
-                        size="sm"
-                        color="danger"
-                        sx={{ maxHeight: '100%' }}
-                        variant={'soft'}
-                        onClick={() => {
-                          handleAbort?.();
-                        }}
-                      >
-                        <StopRoundedIcon />
-                      </IconButton>
-                    )}
+                    : {}),
+                  flex: 1, // Take up remaining space
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  // Just add rounded corners - minimal change
+                  borderRadius: '25px',
+                  '.MuiTextarea-endDecorator': {
+                    marginBlock: 0,
+                    marginTop: 'auto',
+                  },
+                  '.MuiTextarea-startDecorator': {
+                    marginBlockEnd: 0,
+                    marginTop: 'auto',
+                  },
+                })}
+                variant="soft"
+                size="sm"
+                placeholder="سوالی داری ؟ 💬"
+                color="neutral"
+                startDecorator={
+                  <Stack
+                    direction={'row'}
+                    justifyContent={'flex-start'}
+                    sx={{ minWidth: 'auto' }}
+                  >
+                    <IconButton
+                      variant="plain"
+                      sx={{ maxHeight: '100%' }}
+                      size="sm"
+                      onClick={() => setIsTextAreaExpended(!isTextAreaExpanded)}
+                    >
+                      {isTextAreaExpanded ? (
+                        <UnfoldLessOutlinedIcon />
+                      ) : (
+                        <UnfoldMoreOutlinedIcon />
+                      )}
+                    </IconButton>
                   </Stack>
-                </Stack>
-              }
-              {...methods.register('query')}
-              onBlur={(e) => {}} // // Otherwise got error when submiting with return key 🤷
-            />
+                }
+                endDecorator={
+                  <Stack
+                    direction={'row'}
+                    justifyContent={'flex-end'}
+                    spacing={1}
+                  >
+                    {draftReplyInput &&
+                      React.cloneElement(draftReplyInput, {
+                        onReply: handleOnDraftReply,
+                        inputRef: textAreaRef,
+                      })}
+
+                    {/* Commented out attachment button as requested */}
+                    {/* {withFileUpload && (
+                      <FileUploader
+                        accept={AcceptedMimeTypes}
+                        changeCallback={(f) => setFiles(f)}
+                      />
+                    )} */}
+                  </Stack>
+                }
+                {...methods.register('query')}
+                onBlur={(e) => {}} // // Otherwise got error when submiting with return key 🤷
+              />
+
+              {/* Send Button - Outside the textarea */}
+              {!isLoading && (
+                <IconButton
+                  size="lg"
+                  type="submit"
+                  disabled={isLoading || !methods.formState.isValid}
+                  sx={{
+                    minHeight: '40px',
+                    minWidth: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: 'primary', // More grey color
+                    color: 'neutral.600',
+                    '&:hover': {
+                      backgroundColor: 'neutral.400',
+                    },
+                    '&:disabled': {
+                      backgroundColor: 'neutral.200',
+                      color: 'primary',
+                    },
+                  }}
+                  variant="soft"
+                >
+                  <SendRoundedIcon />
+                </IconButton>
+              )}
+
+              {isLoading && handleAbort && (
+                <IconButton
+                  size="sm"
+                  color="danger"
+                  sx={{
+                    minHeight: '40px',
+                    minWidth: '40px',
+                    borderRadius: '50%',
+                  }}
+                  variant="soft"
+                  onClick={() => {
+                    handleAbort?.();
+                  }}
+                >
+                  <StopRoundedIcon />
+                </IconButton>
+              )}
+            </Stack>
 
             <Stack>
               <Stack
