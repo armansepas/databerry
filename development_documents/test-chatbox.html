@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Chatbox Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #2196f3;
+            color: white;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Local Chaindesk Chatbox Test</h1>
+        
+        <div class="info">
+            <h3>What's happening:</h3>
+            <ul>
+                <li><strong>Dashboard:</strong> Running on <code>http://localhost:3000</code></li>
+                <li><strong>Embeds Server:</strong> Running on <code>http://localhost:8000</code></li>
+                <li><strong>Landing Page:</strong> Running on <code>http://localhost:3002</code></li>
+                <li><strong>Docs:</strong> Running on <code>http://localhost:3333</code></li>
+                <li><strong>Emails:</strong> Running on <code>http://localhost:8888</code></li>
+            </ul>
+            
+            <p><strong>This HTML file</strong> demonstrates the chatbox bubble widget using your local development environment instead of the CDN.</p>
+        </div>
+
+        <div class="test-buttons">
+            <button onclick="openWidget()">Open Chat</button>
+            <button onclick="closeWidget()">Close Chat</button>
+            <button onclick="toggleWidget()">Toggle Chat</button>
+            <button onclick="newConversation()">New Conversation</button>
+        </div>
+
+        <h3>Local Development vs Production:</h3>
+        <p><strong>Production CDN URL:</strong> <code>https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js</code></p>
+        <p><strong>Local Development URL:</strong> <code>http://localhost:8000/dist/chatbox/index.js</code></p>
+        
+        <h3>Your Agent ID:</h3>
+        <p><code>cmchosgmh0004mzeuk6xh8far</code></p>
+    </div>
+
+    <!-- Load the chatbox from your local development server -->
+    <script type="module">
+        import Chatbox from 'http://localhost:8000/dist/chatbox/index.js';
+
+        // Initialize the bubble with your agent ID
+        const widget = await Chatbox.initBubble({
+            agentId: 'cmchosgmh0004mzeuk6xh8far',
+            // You can add additional options here if needed
+            // contact: {
+            //     firstName: 'Test',
+            //     lastName: 'User',
+            //     email: 'test@example.com'
+            // }
+        });
+
+        // Make widget available globally for the buttons
+        window.chatWidget = widget;
+
+        // Functions for the test buttons
+        window.openWidget = () => {
+            widget.open();
+        };
+
+        window.closeWidget = () => {
+            widget.close();
+        };
+
+        window.toggleWidget = () => {
+            widget.toggle();
+        };
+
+        window.newConversation = () => {
+            widget.createNewConversation();
+        };
+
+        console.log('🚀 Chatbox loaded successfully!');
+        console.log('Widget methods available:', Object.keys(widget));
+    </script>
+</body>
+</html>
+</html>
