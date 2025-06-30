@@ -196,7 +196,7 @@ function ChatMessageComponent({
                 )}
               </ChatMessageCard>
               <Stack>
-                <Stack gap={1} direction="row">
+                <Stack gap={1} direction="row" sx={{ padding: '0 4px' }}>
                   {message?.fromName && (
                     <Typography level="body-xs" sx={{ opacity: '0.8', pl: 1 }}>
                       {message?.fromName}
