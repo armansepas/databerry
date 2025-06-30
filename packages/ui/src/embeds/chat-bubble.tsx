@@ -57,6 +57,7 @@ const ChatBoxLayout = (props: {
         height: '100%',
         maxHeight: '100%',
         overflowY: 'hidden',
+        direction: 'rtl',
       }}
     >
       <Box
@@ -82,31 +83,33 @@ const ChatBoxLayout = (props: {
             // background: t.palette.background.body,
           })}
         >
-          <Avatar
-            size={'sm'}
-            variant="outlined"
-            sx={{ mr: 1 }}
-            src={props?.imageUrl}
-          />
-          {/* {config??.displayName && ( */}
-          <Typography
-            level="body-lg"
-            sx={(t) => ({
-              fontFamily: 'Bricolage Grotesque',
-              fontWeight: t.fontWeight.lg,
-              color: 'white',
-            })}
-          >
-            {props.config?.displayName}
-          </Typography>
-          {/* )} */}
-
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Avatar
+              size={'sm'}
+              variant="outlined"
+              sx={{ mr: 1 }}
+              src={props?.imageUrl}
+            />
+            {/* {config??.displayName && ( */}
+            <Typography
+              level="body-lg"
+              sx={(t) => ({
+                fontFamily: 'Bricolage Grotesque',
+                fontWeight: t.fontWeight.lg,
+                color: 'white',
+              })}
+            >
+              {props.config?.displayName}
+            </Typography>
+            {/* )} */}
+          </div>
           <Stack
             direction="row"
             sx={{
-              ml: 'auto',
+              mr: 'auto',
               alignItems: 'center',
               gap: '4px',
+              justifyContent: 'flex-end',
             }}
           >
             <NewChatButton variant="plain" sx={{ bgcolor: '#fff' }} />
