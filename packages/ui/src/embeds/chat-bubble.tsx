@@ -430,13 +430,15 @@ function ChatBubble({ ...props }: BubbleProps) {
                     maxWidth: '100vw',
                   },
 
-                  // '& .message-agent': {},
-                  // '& .message-human': {
-                  //   backgroundColor: config?.primaryColor,
-                  // },
-                  // '& .message-human *': {
-                  //   color: textColor,
-                  // },
+                  '& .message-agent': {
+                    backgroundColor: '#f5f5f5',
+                  },
+                  '& .message-human': {
+                    backgroundColor: config?.primaryColor,
+                  },
+                  '& .message-human *': {
+                    color: 'inherit',
+                  },
 
                   overflowY: 'hidden',
                 })}

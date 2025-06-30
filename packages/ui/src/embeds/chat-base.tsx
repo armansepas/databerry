@@ -83,9 +83,12 @@ function Standard({
           boxSizing: 'border-box',
           backgroundColor: interfaceConfig?.isBgTransparent
             ? 'transparent'
-            : theme.palette.background.default,
+            : '#fff', // put this if the theme default => theme.palette.background.default,
 
-          '& .message-agent': {},
+          '& .message-agent': {
+            // backgroundColor: `${primaryColor}10`,
+            backgroundColor: '#f3f4f6',
+          },
           '& .message-human': {
             backgroundColor: primaryColor,
           },

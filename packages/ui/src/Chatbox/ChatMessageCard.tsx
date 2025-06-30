@@ -4,11 +4,17 @@ import React from 'react';
 
 type Props = CardProps & {};
 
-function ChatMessageCard({ sx, children, className, ...otherProps }: Props) {
+function ChatMessageCard({
+  sx,
+  children,
+  className,
+  variant = 'outlined',
+  ...otherProps
+}: Props) {
   return (
     <Card
       size="sm"
-      variant={'outlined'}
+      variant={variant}
       className={clsx([className])}
       sx={(theme) => ({
         overflowY: 'hidden',
