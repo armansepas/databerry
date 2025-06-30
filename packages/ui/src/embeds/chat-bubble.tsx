@@ -66,6 +66,7 @@ const ChatBoxLayout = (props: {
           top: 0,
           left: 0,
           right: 0,
+          backgroundColor: props.config?.primaryColor,
         }}
       >
         <Stack
@@ -93,6 +94,7 @@ const ChatBoxLayout = (props: {
             sx={(t) => ({
               fontFamily: 'Bricolage Grotesque',
               fontWeight: t.fontWeight.lg,
+              color: 'white',
             })}
           >
             {props.config?.displayName}
@@ -104,14 +106,15 @@ const ChatBoxLayout = (props: {
             sx={{
               ml: 'auto',
               alignItems: 'center',
+              gap: '4px',
             }}
           >
-            <NewChatButton variant="plain" />
-
+            <NewChatButton variant="plain" sx={{ bgcolor: '#fff' }} />
             {props.handleClose && (
               <IconButton
                 variant="plain"
                 size="sm"
+                sx={{ bgcolor: '#fff' }}
                 // onClick={() => setState({ isOpen: false })}
                 onClick={props.handleClose}
               >
@@ -318,7 +321,7 @@ function ChatBubble({ ...props }: BubbleProps) {
                 })
               }
             >
-              <CloseIcon sx={{ fontSize: 'sm' }} />
+              <CloseIcon sx={{ fontSize: 'sm', color: 'white' }} />
             </IconButton>
 
             <AnimateMessagesOneByOne
