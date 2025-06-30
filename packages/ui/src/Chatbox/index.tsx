@@ -576,6 +576,7 @@ function ChatBox({
               </Stack>
             )}
 
+            {/* ========= input area of the chat bubble =========*/}
             <Textarea
               // placeholder="Press Shift + Enter to move to the next line"
               autoFocus={!!autoFocus}
@@ -619,7 +620,10 @@ function ChatBox({
                   // margin: 0,
                 },
               })}
-              variant="outlined"
+              variant="soft"
+              size="sm"
+              placeholder="سوالی داری ؟"
+              color="neutral"
               startDecorator={
                 <Stack
                   direction={'row'}
