@@ -623,6 +623,23 @@ function ChatBox({
                     marginBlockEnd: 0,
                     marginTop: 'auto',
                   },
+                  // Fix vertical centering for RTL text
+                  '& textarea': {
+                    direction: 'rtl',
+                    lineHeight: '40px', // Match the minHeight for single line vertical centering
+                    minHeight: '40px',
+                    paddingTop: '0px',
+                    paddingBottom: '0px',
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                  },
+                  // Fix placeholder vertical alignment
+                  '& textarea::placeholder': {
+                    textAlign: 'center',
+                    direction: 'rtl',
+                    opacity: 0.7,
+                    lineHeight: '40px', // Match the container height
+                  },
                 })}
                 variant="soft"
                 size="sm"
