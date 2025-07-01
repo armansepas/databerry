@@ -48,8 +48,8 @@ function ChatMessageComponent({
       sx={{
         width: '100%',
         maxWidth: '100%',
-        mr: message?.from === 'agent' ? 'auto' : 'none',
-        ml: message?.from === 'human' ? 'auto' : 'none',
+        mr: message?.from === 'human' ? 'auto' : 'none',
+        ml: message?.from === 'agent' ? 'auto' : 'none',
       }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -59,7 +59,7 @@ function ChatMessageComponent({
           width: '100%',
           maxWidth: '100%',
         }}
-        direction={'row'}
+        direction={message?.from === 'human' ? 'row' : 'row-reverse'}
         gap={1}
       >
         <Avatar
@@ -141,8 +141,12 @@ function ChatMessageComponent({
                 className={cn(
                   message?.from === 'agent' ? 'message-agent' : 'message-human'
                 )}
+                variant={message?.from === 'agent' ? 'soft' : 'outlined'}
                 sx={{
                   mr: 'auto',
+                  ...(message?.from === 'agent' && {
+                    backgroundColor: '#f5f5f5',
+                  }),
                 }}
               >
                 {/* {message?.step?.type === 'tool_call' && (
@@ -192,7 +196,7 @@ function ChatMessageComponent({
                 )}
               </ChatMessageCard>
               <Stack>
-                <Stack gap={1} direction="row">
+                <Stack gap={1} direction="row" sx={{ padding: '0 4px' }}>
                   {message?.fromName && (
                     <Typography level="body-xs" sx={{ opacity: '0.8', pl: 1 }}>
                       {message?.fromName}

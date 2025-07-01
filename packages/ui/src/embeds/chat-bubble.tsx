@@ -57,6 +57,7 @@ const ChatBoxLayout = (props: {
         height: '100%',
         maxHeight: '100%',
         overflowY: 'hidden',
+        direction: 'rtl',
       }}
     >
       <Box
@@ -66,6 +67,7 @@ const ChatBoxLayout = (props: {
           top: 0,
           left: 0,
           right: 0,
+          backgroundColor: props.config?.primaryColor,
         }}
       >
         <Stack
@@ -81,37 +83,41 @@ const ChatBoxLayout = (props: {
             // background: t.palette.background.body,
           })}
         >
-          <Avatar
-            size={'sm'}
-            variant="outlined"
-            sx={{ mr: 1 }}
-            src={props?.imageUrl}
-          />
-          {/* {config??.displayName && ( */}
-          <Typography
-            level="body-lg"
-            sx={(t) => ({
-              fontFamily: 'Bricolage Grotesque',
-              fontWeight: t.fontWeight.lg,
-            })}
-          >
-            {props.config?.displayName}
-          </Typography>
-          {/* )} */}
-
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Avatar
+              size={'sm'}
+              variant="outlined"
+              sx={{ mr: 1 }}
+              src={props?.imageUrl}
+            />
+            {/* {config??.displayName && ( */}
+            <Typography
+              level="body-lg"
+              sx={(t) => ({
+                fontFamily: 'Bricolage Grotesque',
+                fontWeight: t.fontWeight.lg,
+                color: 'white',
+              })}
+            >
+              {props.config?.displayName}
+            </Typography>
+            {/* )} */}
+          </div>
           <Stack
             direction="row"
             sx={{
-              ml: 'auto',
+              mr: 'auto',
               alignItems: 'center',
+              gap: '4px',
+              justifyContent: 'flex-end',
             }}
           >
-            <NewChatButton variant="plain" />
-
+            <NewChatButton variant="plain" sx={{ bgcolor: '#fff' }} />
             {props.handleClose && (
               <IconButton
                 variant="plain"
                 size="sm"
+                sx={{ bgcolor: '#fff' }}
                 // onClick={() => setState({ isOpen: false })}
                 onClick={props.handleClose}
               >
@@ -318,7 +324,7 @@ function ChatBubble({ ...props }: BubbleProps) {
                 })
               }
             >
-              <CloseIcon sx={{ fontSize: 'sm' }} />
+              <CloseIcon sx={{ fontSize: 'sm', color: 'white' }} />
             </IconButton>
 
             <AnimateMessagesOneByOne
@@ -424,13 +430,15 @@ function ChatBubble({ ...props }: BubbleProps) {
                     maxWidth: '100vw',
                   },
 
-                  // '& .message-agent': {},
-                  // '& .message-human': {
-                  //   backgroundColor: config?.primaryColor,
-                  // },
-                  // '& .message-human *': {
-                  //   color: textColor,
-                  // },
+                  '& .message-agent': {
+                    backgroundColor: '#f5f5f5',
+                  },
+                  '& .message-human': {
+                    backgroundColor: config?.primaryColor,
+                  },
+                  '& .message-human *': {
+                    color: 'inherit',
+                  },
 
                   overflowY: 'hidden',
                 })}
